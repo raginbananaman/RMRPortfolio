@@ -775,7 +775,7 @@ const ScrollyTelling = () => {
           viewport={{ once: true }}
         >
           <h3 className="text-4xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-periwinkle filter blur-[0.5px]">
-            SYSTEMS = CLARITY
+            SYSTEMS THAT GIVE CLARITY
           </h3>
         </motion.div>
       </div>
