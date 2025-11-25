@@ -1,6 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from 'framer-motion';
-import { Terminal, Layers, User, Mail, ArrowRight, X, Aperture, Cpu, PenTool, Video, Linkedin } from 'lucide-react';
+import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence, MotionValue } from 'framer-motion';
+import { Terminal, Layers, User, Mail, ArrowRight, X, Aperture, Cpu, PenTool, Video } from 'lucide-react';
+
+// --- TYPES ---
+interface Project {
+  id: number;
+  title: string;
+  category: string;
+  size: string;
+  image: string;
+  tags: string[];
+  link: string;
+}
+
+interface Skill {
+  title: string;
+  icon: React.ElementType;
+}
 
 // --- DATA SOURCE ---
 const CONTENT = {
@@ -112,25 +128,23 @@ const GrainOverlay = () => (
 // --- SECTIONS ---
 
 const HeroSection = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
+    y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0
+  }));
   const [isMobile, setIsMobile] = useState(false);
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    
-    // Initialize light to center of screen so it's not dark initially
-    setMousePosition({ 
-      x: window.innerWidth / 2, 
-      y: window.innerHeight / 2 
-    });
 
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
     // Update position on mouse move
     const rect = containerRef.current.getBoundingClientRect();
     setMousePosition({
@@ -139,7 +153,8 @@ const HeroSection = () => {
     });
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!containerRef.current) return;
     // Update position on touch drag
     const rect = containerRef.current.getBoundingClientRect();
     setMousePosition({
@@ -209,9 +224,9 @@ const HeroSection = () => {
 };
 
 const Dock = () => {
-  let mouseX = useMotionValue(Infinity);
+  const mouseX = useMotionValue(Infinity);
 
-  const scrollTo = (id) => {
+  const scrollTo = (id: string) => {
     const element = document.getElementById(id);
     if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
@@ -236,16 +251,16 @@ const Dock = () => {
   );
 };
 
-const DockIcon = ({ mouseX, icon, label, onClick }) => {
-  let ref = useRef(null);
+const DockIcon = ({ mouseX, icon, label, onClick }: { mouseX: MotionValue; icon: React.ReactNode; label: string; onClick: () => void }) => {
+  const ref = useRef<HTMLDivElement>(null);
 
-  let distance = useTransform(mouseX, (val) => {
-    let bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+  const distance = useTransform(mouseX, (val) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });
 
-  let widthSync = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
-  let width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
+  const widthSync = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
+  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
     <motion.div
@@ -265,10 +280,10 @@ const DockIcon = ({ mouseX, icon, label, onClick }) => {
   );
 };
 
-const BentoGrid = ({ setBgColor }) => {
-  const [selectedId, setSelectedId] = useState(null);
+const BentoGrid = () => {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const getGridClasses = (size) => {
+  const getGridClasses = (size: string) => {
     switch(size) {
       case 'large': return 'md:col-span-2 md:row-span-2 min-h-[300px] md:min-h-[500px]';
       case 'wide': return 'md:col-span-2 min-h-[250px]';
@@ -291,7 +306,7 @@ const BentoGrid = ({ setBgColor }) => {
         </motion.h2>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-min pb-24">
-          {CONTENT.projects.map((project, i) => (
+          {CONTENT.projects.map((project: Project) => (
             <motion.div
               key={project.id}
               layoutId={`card-${project.id}`}
@@ -326,7 +341,7 @@ const BentoGrid = ({ setBgColor }) => {
       </div>
 
       <AnimatePresence>
-        {selectedId && (
+        {selectedId && selectedProject && (
           <motion.div 
             className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-md p-0 md:p-10"
             initial={{ opacity: 0 }}
@@ -383,7 +398,7 @@ const BentoGrid = ({ setBgColor }) => {
 };
 
 const ScrollyTelling = () => {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start center", "end center"]
@@ -418,7 +433,7 @@ const ScrollyTelling = () => {
   );
 };
 
-const SkillItem = ({ skill, index }) => {
+const SkillItem = ({ skill, index }: { skill: Skill; index: number }) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
