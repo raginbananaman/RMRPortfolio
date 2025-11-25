@@ -472,7 +472,7 @@ const AboutSection = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent border border-white/20 rounded-2xl z-10 pointer-events-none" />
           <img 
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop" 
+            src="src\assets\PPhoto.png" 
             alt="Reanne"
             className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out scale-110 group-hover:scale-100"
           />
